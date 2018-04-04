@@ -304,8 +304,17 @@ func (s *scope) decorateRequest(req *http.Request) (*http.Request, url.Values) {
 	// Set query_id as scope_id to have possibility to kill query if needed.
 	params.Set("query_id", s.id.String())
 
-	// Keep allowed params.
 	origParams := req.URL.Query()
+	for key := range origParams {
+		if strings.HasSuffix(key,"_structure") || strings.HasSuffix(key,"_format") {
+			allowedParams = append(allowedParams, key)
+		}
+	}
+
+	log.Debugf("Allowed params: %v",
+		allowedParams)
+
+	// Keep allowed params.
 	for _, param := range allowedParams {
 		val := origParams.Get(param)
 		if len(val) > 0 {
